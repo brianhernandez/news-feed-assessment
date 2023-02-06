@@ -1,42 +1,44 @@
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
-import HelloWorld from "./components/HelloWorld.vue";
+import { storeToRefs } from "pinia";
+import TheHero from "./components/TheHero.vue";
+import { useArticlesStore } from "./stores";
+
+const articlesStore = useArticlesStore();
+const { selectedArticle } = storeToRefs(articlesStore);
 </script>
 
 <template>
-  <header>
-    <img
-      alt="Vue logo"
-      class="logo"
-      src="@/assets/logo.svg"
-      width="125"
-      height="125"
-    />
+  <TheHero :title="selectedArticle?.title" />
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+  <nav class="my-3">
+    <RouterLink
+      v-if="$route.name !== 'home'"
+      to="/"
+      @click="articlesStore.resetArticle()"
+      class="text-decoration-none"
+      >Back To Main Feed</RouterLink
+    >
+    <button
+      @click="articlesStore.fetchArticles()"
+      v-if="$route.name === 'home'"
+      class="btn btn-primary btn-lg px-4"
+    >
+      Update Feed
+    </button>
+  </nav>
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
+  <div class="wrapper mx-auto">
+    <RouterView v-slot="{ Component }">
+      <transition name="fade" mode="out-in"
+        ><Component :is="Component" :key="$route.path" /> </transition
+    ></RouterView>
+  </div>
 
-  <RouterView />
+  <footer class="mt-5"></footer>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
 nav {
   width: 100%;
   font-size: 12px;
@@ -62,30 +64,41 @@ nav a:first-of-type {
   border: 0;
 }
 
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.wrapper {
+  padding: 2rem;
+}
+
 @media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
   nav {
-    text-align: left;
-    margin-left: -1rem;
     font-size: 1rem;
-
     padding: 1rem 0;
     margin-top: 1rem;
+  }
+
+  .wrapper {
+    max-width: 1280px;
+    padding: 0 2rem;
+    min-height: 100vh;
+  }
+
+  footer {
+    height: 20vh;
+    background: rgb(49, 78, 154);
+    background: linear-gradient(
+      0deg,
+      rgba(49, 78, 154, 1) 0%,
+      rgba(109, 159, 201, 1) 94%
+    );
   }
 }
 </style>
